@@ -41,7 +41,9 @@
     "promise": "^8.1.0",
     "requestretry": "^4.1.1",
     "resource-router-middleware": "^0.6.0",
-    "retry-promised": "^1.0.3"
+    "retry-promised": "^1.0.3",
+    "sync-request": "^6.1.0",
+    "synchronized-promise": "^0.3.1"
   },
   "devDependencies": {
     "babel-cli": "^6.9.0",

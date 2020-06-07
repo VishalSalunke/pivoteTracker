@@ -2,6 +2,7 @@ import  Promise from 'promise'
 import fs from 'fs'
 import { client } from './index'
 import PDFDocument from 'pdfkit'
+import sp from 'synchronized-promise'
 
  function getAllStoriesArray(projectId, retries=5){
   return new Promise(function (resolve,reject) {
@@ -87,11 +88,13 @@ function createPDF(filename, storyData){
       .addPage()
       .fontSize(27)
       .text(`Story -> ${storyData.story.id} -> Comments`)
+
       for(let i=0; i<storyData.comments.length; i++ ){
         doc.moveDown()
         doc
         .fontSize(25)
         .text(`${storyData.comments[i].commentBy} -> ${storyData.comments[i].text} `)
+
         if(storyData.comments[i].imagePath.length > 0){
           for(let j=0; j<storyData.comments[i].imagePath.length; j++){
            try {
@@ -106,32 +109,38 @@ function createPDF(filename, storyData){
           }
         }
       }
-      doc.end();
-      totalStoriesDone++
-      console.log(`***** Process  ${(100 * totalStoriesDone / totalStoriesAvailable).toFixed(2)}% completed ************** total stories ${totalStoriesAvailable}`)
-  }else{
-    doc.end();
-    totalStoriesDone++
-    console.log(`***** Process  ${ (100 * totalStoriesDone / totalStoriesAvailable).toFixed(2)}% completed ************** total stories ${totalStoriesAvailable}`)
   }
+  doc.end();
+  console.log(`***** Process  ${ (100 * totalStoriesDone / totalStoriesAvailable).toFixed(2)}% completed ************** total stories ${totalStoriesAvailable}`)
 }
 
 let totalStoriesAvailable = 0
 let totalStoriesDone = 0
 function extractAllData(projects){
   console.log("Total projects -> ",projects.length)
+
+  const getAllStoriesArraySync = sp(getAllStoriesArray)
+  const iterateOverAllStoriesSync = sp(iterateOverAllStories)
+  const getCommentsOfstorySync = sp(getCommentsOfstory)
+  const donwloadFileSync = sp(donwloadFile)
+
   for(let i=0; i<projects.length; i++){
     if(projects[i].id !== null){
-     getAllStoriesArray(projects[i].id)
-      .then((stories)=>{
+
+      const stories = getAllStoriesArraySync(projects[i].id)
+
         totalStoriesAvailable = totalStoriesAvailable + stories.length
         for(let j=0; j<stories.length; j++){
           if(stories[j].id !== null && stories[j].id !== undefined){
-              iterateOverAllStories(projects[i].id, stories[j].id)
-            .then( story => {
+
+
+            const story = iterateOverAllStoriesSync(projects[i].id, stories[j].id)
+
                 if(story && story.id !== null && story.id !== undefined){
-                  getCommentsOfstory(projects[i].id, story.id)
-                  .then( comments => {
+                  totalStoriesDone++
+
+                  const comments = getCommentsOfstorySync(projects[i].id, story.id)
+
                    let storyData = {}
                    storyData.story = story
                    storyData.comments = []
@@ -143,11 +152,11 @@ function extractAllData(projects){
                    let filename = `${storyDir}/${story.id}-Story.pdf`
                    let storyJson = `${storyDir}/${story.id}.json`
 
-                   fs.writeFileSync(storyJson, JSON.stringify(story));
-                   2032059
+                   fs.writeFileSync(storyJson, JSON.stringify(story))
 
                    storyData["owner"] = members[story.ownedById] ? members[story.ownedById].username : 'unknown'
                     if(comments.length > 0){
+
                       for(let k=0; k<comments.length; k++){
                         let comment={}
                         comment["text"] = comments[k].text
@@ -159,33 +168,24 @@ function extractAllData(projects){
                         if(comments[k].fileAttachments.length > 0){
 
                           for(let l=0; l<comments[k].fileAttachments.length; l++){
-                            donwloadFile(comments[k].fileAttachments[l], storyDir)
-                            .then(res => {
+                            try {
+                              const res = donwloadFileSync(comments[k].fileAttachments[l], storyDir)
                               if(comments[k].fileAttachments[l].contentType.indexOf('image') !== -1){
                                 comment.imagePath.push(res)
                               }
-                              storyData.comments.push(comment)
-                              createPDF(filename, storyData)
-                            })
-                            .catch(e => console.log(e))
+                            } catch (error) {
+                              console.log("fileAttachment download failed for some reason")
+                            }
                           }
-                        }else{
-                          storyData.comments.push(comment)
-                          createPDF(filename, storyData)
                         }
+                        storyData.comments.push(comment)
                       }
-                    }else{
-                      createPDF(filename, storyData)
+
                     }
-                 })
-                 .catch(e => console.log(e))
+                   createPDF(filename, storyData)
                }
-            })
-            .catch(e => console.log(e))
           } else  console.log("story Id is missing")
         }
-      })
-      .catch(e => console.log(e))
     }else  console.log("Project Id is missing")
   }
 }
