@@ -5,6 +5,182 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getAllPivotTrackerData = undefined;
 
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var getAllStoriesArray = function () {
+  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(projectId) {
+    var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    var retrivedData = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+    var total = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+    return _regenerator2.default.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            console.log(' offset -> ' + offset);
+            return _context3.abrupt('return', new _promise2.default(function () {
+              var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(resolve, reject) {
+                var _this = this;
+
+                var getData, _ref5, data, newData;
+
+                return _regenerator2.default.wrap(function _callee2$(_context2) {
+                  while (1) {
+                    switch (_context2.prev = _context2.next) {
+                      case 0:
+                        // client.project(projectId).stories.all(function (error,stories) {
+                        //   if(error && (error.code === "ETIMEDOUT" || error.code === "ECONNRESET") && retries > 0){
+                        //     getAllStoriesArray(projectId, retries-1)
+                        //   }else if(!error){
+                        //     resolve(stories)
+                        //   }
+                        //   else{
+                        //     reject(error)
+                        //   }
+                        // })
+
+                        getData = function () {
+                          var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(id, ofset) {
+                            var _ref4, data;
+
+                            return _regenerator2.default.wrap(function _callee$(_context) {
+                              while (1) {
+                                switch (_context.prev = _context.next) {
+                                  case 0:
+                                    _context.prev = 0;
+                                    _context.next = 3;
+                                    return _axios2.default.get('https://www.pivotaltracker.com/services/v5/projects/' + id + '/stories?limit=500&offset=' + ofset + '&envelope=true', { headers: { 'X-TrackerToken': '4f8300952fe41dbf4063613ec2cd200a' } });
+
+                                  case 3:
+                                    _ref4 = _context.sent;
+                                    data = _ref4.data;
+
+                                    console.log(" new data length", data.data.length);
+                                    return _context.abrupt('return', data.data);
+
+                                  case 9:
+                                    _context.prev = 9;
+                                    _context.t0 = _context['catch'](0);
+                                    return _context.abrupt('return', _context.t0);
+
+                                  case 12:
+                                  case 'end':
+                                    return _context.stop();
+                                }
+                              }
+                            }, _callee, _this, [[0, 9]]);
+                          }));
+
+                          return function getData(_x7, _x8) {
+                            return _ref3.apply(this, arguments);
+                          };
+                        }();
+
+                        _context2.prev = 1;
+                        _context2.next = 4;
+                        return _axios2.default.get('https://www.pivotaltracker.com/services/v5/projects/' + projectId + '/stories?limit=500&offset=' + offset + '&envelope=true', { headers: { 'X-TrackerToken': '4f8300952fe41dbf4063613ec2cd200a' } });
+
+                      case 4:
+                        _ref5 = _context2.sent;
+                        data = _ref5.data;
+
+                        retrivedData = [].concat((0, _toConsumableArray3.default)(retrivedData), (0, _toConsumableArray3.default)(data.data));
+                        total = data.pagination.total;
+
+                        if (!(total !== retrivedData.length)) {
+                          _context2.next = 20;
+                          break;
+                        }
+
+                      case 9:
+                        if (!(total !== retrivedData.length)) {
+                          _context2.next = 18;
+                          break;
+                        }
+
+                        offset = offset + 500;
+                        // console.log("offset", offset)
+                        _context2.next = 13;
+                        return getData(projectId, offset);
+
+                      case 13:
+                        newData = _context2.sent;
+
+                        // console.log("Newww data", newData.length)
+                        retrivedData = [].concat((0, _toConsumableArray3.default)(retrivedData), (0, _toConsumableArray3.default)(newData));
+                        console.log(' stories progress ' + retrivedData.length);
+                        _context2.next = 9;
+                        break;
+
+                      case 18:
+                        _context2.next = 22;
+                        break;
+
+                      case 20:
+                        console.log('stories final count ' + retrivedData.length);
+                        resolve(retrivedData);
+
+                      case 22:
+                        _context2.next = 27;
+                        break;
+
+                      case 24:
+                        _context2.prev = 24;
+                        _context2.t0 = _context2['catch'](1);
+
+                        reject(_context2.t0);
+
+                      case 27:
+                        resolve(retrivedData);
+
+                        //   console.log('Total length')
+                        //   retrivedData = [...retrivedData, ...data.data]
+                        //  console.log(retrivedData.length)
+                        //  offset = offset + 500
+                        //  if(data.pagination.total >= offset ){
+                        //   asyncFunc(offset,retrivedData )
+                        //  }
+
+
+                      case 28:
+                      case 'end':
+                        return _context2.stop();
+                    }
+                  }
+                }, _callee2, this, [[1, 24]]);
+              }));
+
+              return function (_x5, _x6) {
+                return _ref2.apply(this, arguments);
+              };
+            }()));
+
+          case 2:
+          case 'end':
+            return _context3.stop();
+        }
+      }
+    }, _callee3, this);
+  }));
+
+  return function getAllStoriesArray(_x) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
 var _promise = require('promise');
 
 var _promise2 = _interopRequireDefault(_promise);
@@ -23,23 +199,14 @@ var _synchronizedPromise = require('synchronized-promise');
 
 var _synchronizedPromise2 = _interopRequireDefault(_synchronizedPromise);
 
+var _axios = require('axios');
+
+var _axios2 = _interopRequireDefault(_axios);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function getAllStoriesArray(projectId) {
-  var retries = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 5;
-
-  return new _promise2.default(function (resolve, reject) {
-    _index.client.project(projectId).stories.all(function (error, stories) {
-      if (error && (error.code === "ETIMEDOUT" || error.code === "ECONNRESET") && retries > 0) {
-        getAllStoriesArray(projectId, retries - 1);
-      } else if (!error) {
-        resolve(stories);
-      } else {
-        reject(error);
-      }
-    });
-  });
-}
+var _require = require('perf_hooks'),
+    performance = _require.performance;
 
 function iterateOverAllStories(projectId, storyId) {
   var retries = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 5;
@@ -47,7 +214,7 @@ function iterateOverAllStories(projectId, storyId) {
   return new _promise2.default(function (resolve, reject) {
     _index.client.project(projectId).story(storyId).get(function (error, story) {
       if (error && (error.code === "ETIMEDOUT" || error.code === "ECONNRESET") && retries > 0) {
-        getAllStoriesArray(projectId, retries - 1);
+        iterateOverAllStories(projectId, storyId, retries - 1);
       } else if (!error) {
         resolve(story);
       } else {
@@ -63,7 +230,7 @@ function getCommentsOfstory(projectId, storyId) {
   return new _promise2.default(function (resolve, reject) {
     _index.client.project(projectId).story(storyId).comments.all(function (error, comments) {
       if (error && (error.code === "ETIMEDOUT" || error.code === "ECONNRESET") && retries > 0) {
-        getAllStoriesArray(projectId, retries - 1);
+        getCommentsOfstory(projectId, storyId, retries - 1);
       } else if (!error) {
         resolve(comments);
       } else {
@@ -76,6 +243,8 @@ function getCommentsOfstory(projectId, storyId) {
 function donwloadFile(attachment, storyDir) {
   var retries = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 3;
 
+  console.log("download started");
+  var t0 = performance.now();
   return new _promise2.default(function (resolve, reject) {
     var filename = attachment.filename.trim().replace(/ /g, "_");
     _index.client.attachment(attachment.id).download(storyDir + '/' + filename, function (error) {
@@ -83,6 +252,8 @@ function donwloadFile(attachment, storyDir) {
         donwloadFile(attachment, storyDir, retries - 1);
       } else if (!error) {
         console.log('Download success - ' + storyDir + '/' + attachment.filename);
+        var t1 = performance.now();
+        console.log('#### Download completed in ' + (t1 - t0) / 1000 + ' seconds');
         resolve(storyDir + '/' + filename);
       } else {
         reject(error);
@@ -131,7 +302,7 @@ function createPDF(filename, storyData) {
 
 var totalStoriesAvailable = 0;
 var totalStoriesDone = 0;
-function extractAllData(projects) {
+function extractAllData(projects, remainingStories) {
   console.log("Total projects -> ", projects.length);
 
   var getAllStoriesArraySync = (0, _synchronizedPromise2.default)(getAllStoriesArray);
@@ -140,13 +311,14 @@ function extractAllData(projects) {
   var donwloadFileSync = (0, _synchronizedPromise2.default)(donwloadFile);
 
   for (var i = 0; i < projects.length; i++) {
-    if (projects[i].id !== null) {
+    var pro = projects[i].id;
+    if (pro === 1600389) {
 
       var stories = getAllStoriesArraySync(projects[i].id);
-
+      console.log('Project ' + projects[i].id + ' has ' + stories.length + ' stories');
       totalStoriesAvailable = totalStoriesAvailable + stories.length;
       for (var j = 0; j < stories.length; j++) {
-        if (stories[j].id !== null && stories[j].id !== undefined) {
+        if (!remainingStories.includes(stories[j].id)) {
 
           var story = iterateOverAllStoriesSync(projects[i].id, stories[j].id);
 
@@ -166,7 +338,7 @@ function extractAllData(projects) {
             var filename = storyDir + '/' + story.id + '-Story.pdf';
             var storyJson = storyDir + '/' + story.id + '.json';
 
-            _fs2.default.writeFileSync(storyJson, JSON.stringify(story));
+            _fs2.default.writeFileSync(storyJson, (0, _stringify2.default)(story));
 
             storyData["owner"] = members[story.ownedById] ? members[story.ownedById].username : 'unknown';
             if (comments.length > 0) {
@@ -205,18 +377,19 @@ function extractAllData(projects) {
 
 var members = {};
 
-function getprojects() {
+function getprojects(remainingStories) {
   _index.client.projects.all(function (error, projects) {
     if (error) {
       console.log("error in all project fetch");
       console.log(error);
     } else {
-      extractAllData(projects);
+      extractAllData(projects, remainingStories);
     }
   });
 }
 
-var getAllPivotTrackerData = exports.getAllPivotTrackerData = function getAllPivotTrackerData() {
+var getAllPivotTrackerData = exports.getAllPivotTrackerData = function getAllPivotTrackerData(remainingStories) {
+
   _index.client.account(888851).memberships.all(function (error, memberships) {
     if (error) {
       console.log(error);
@@ -227,7 +400,7 @@ var getAllPivotTrackerData = exports.getAllPivotTrackerData = function getAllPiv
           email: member.email
         };
       });
-      getprojects();
+      getprojects(remainingStories);
     }
   });
 };
